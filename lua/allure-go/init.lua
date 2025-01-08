@@ -174,36 +174,6 @@ end
 
 function M.setup(opts)
 	opts = opts or {}
-	-- Define user commands for the plugin
-	vim.api.nvim_create_user_command('AllureServe', M.check_and_run_allure, { desc = 'Run AllureServe' })
-	vim.api.nvim_create_user_command('AllureStop', M.stop_allure, { desc = 'Stop AllureServe' })
-	vim.api.nvim_create_user_command('TestFunc', M.run_go_test, { desc = 'Run test under cursor' })
-	vim.api.nvim_create_user_command('TestAll', M.run_go_test_all, { desc = 'Run all tests' })
-	vim.api.nvim_create_user_command('StopRunningTest', M.stop_tests, { desc = 'Stop running test' })
-	vim.api.nvim_create_user_command('ChangeTag', M.change_tag, { desc = 'Change tag' })
-
-	-- Map keybindings to trigger the functions
-	vim.api.nvim_set_keymap('n', '<leader>tr', '<Cmd>AllureServe<CR>',
-		{ noremap = true, silent = true, desc = '[r]un AllureServe' })
-	vim.api.nvim_set_keymap('n', '<leader>ts', '<Cmd>AllureStop<CR>',
-		{ noremap = true, silent = true, desc = '[s]top AllureServe' })
-	vim.api.nvim_set_keymap('n', '<leader>tf', '<Cmd>TestFunc<CR>',
-		{ noremap = true, silent = true, desc = 'Run test [f]unction under cursor' })
-	vim.api.nvim_set_keymap('n', '<leader>ta', '<Cmd>TestAll<CR>',
-		{ noremap = true, silent = true, desc = 'Run [a]ll tests' })
-	vim.api.nvim_set_keymap('n', '<leader>tp', '<Cmd>StopRunningTest<CR>',
-		{ noremap = true, silent = true, desc = 'Sto[p] currently running test' })
-	vim.api.nvim_set_keymap('n', '<leader>tc', '<Cmd>ChangeTag<CR>',
-		{ noremap = true, silent = true, desc = '[c]hange tag' })
-
-
-	vim.keymap.set("n", "<Leader>h", function()
-		if opts.name then
-			print("hello, " .. opts.name)
-		else
-			print("hello")
-		end
-	end)
 end
 
 return M
