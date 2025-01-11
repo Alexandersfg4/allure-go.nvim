@@ -18,7 +18,10 @@ A plugin wrapper for [allure-go](https://github.com/ozontech/allure-go) and [All
    -- lazy.nvim
    {
       "Alexandersfg4/allure-go.nvim",
-      opts = {},
+      opts = {
+           -- Path to the tests
+           test_path = "test/tests"
+       },
       keys = {
          -- Allure keymaps
          { "<leader>tr", "<cmd>lua require('allure-go').check_and_run_allure()<cr>", desc = "Run allure serve" },
@@ -26,7 +29,7 @@ A plugin wrapper for [allure-go](https://github.com/ozontech/allure-go) and [All
          { "<leader>tf", "<cmd>lua require('allure-go').run_go_test()<cr>",          desc = "Run test under cursor" },
          { "<leader>ta", "<cmd>lua require('allure-go').run_go_test_all()<cr>",      desc = "Run all tests" },
          { "<leader>tp", "<cmd>lua require('allure-go').stop_tests()<cr>",           desc = "Stop currently running test" },
-         { "<leader>tc", "<cmd>lua require('allure-go').change_tag()<cr>",           desc = "Change tag" },
+         { "<leader>tc", "<cmd>lua require('allure-go').change_tag()<cr>",           desc = "Change build tag" },
       },
    }
    ```
