@@ -1,12 +1,56 @@
 local M = {}
 M.tag = "integration" -- Default build tag
-M.test_path = "test/tests"
+M.test_path = "./..." -- Default test path
 
 local test_job_ids = {}
 local allure_job_ids = {}
 local allure_results = "/allure-results"
 local win
 local is_stopped_running = false
+local config_file_path = ".idea/allure.cfg"
+
+local function ensure_directory_exists()
+	local dir = ".idea"
+	if vim.fn.isdirectory(dir) == 0 then
+		vim.fn.mkdir(dir, "p") -- Create the directory
+	end
+end
+
+local function load_config()
+	ensure_directory_exists() -- Ensure the directory exists
+	local project_root = vim.fn.getcwd()
+	local full_path = project_root .. "/" .. config_file_path
+	local file = io.open(full_path, "r")
+	if file then
+		for line in file:lines() do
+			local key, value = line:match("(%S+)%s*=%s*(%S+)")
+			if key == "tag" then
+				M.tag = value
+			elseif key == "test_path" then
+				M.test_path = value
+			end
+		end
+		file:close()
+	else
+		-- If the config file doesn't exist or is inaccessible, ensure a fallback value
+		M.test_path = "test/tests"
+	end
+end
+
+-- Call to load the configuration when the module is loaded
+load_config()
+
+local function save_config()
+	ensure_directory_exists() -- Ensure the directory exists
+	local project_root = vim.fn.getcwd()
+	local full_path = project_root .. "/" .. config_file_path
+	local file = io.open(full_path, "w")
+	if file then
+		file:write("tag = " .. M.tag .. "\n")
+		file:write("test_path = " .. M.test_path .. "\n")
+		file:close()
+	end
+end
 
 local function stop_jobs(job_ids)
 	if next(job_ids) ~= nil then
@@ -57,6 +101,9 @@ local function run_command(command, cwd, on_exit, silent)
 			win = 0,
 		})
 
+		-- Write the command to the buffer as the first line
+		vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Command: " .. command })
+
 		job_id = vim.fn.jobstart(command, {
 			cwd = cwd,
 			on_stdout = function(_, data)
@@ -81,7 +128,6 @@ local function run_command(command, cwd, on_exit, silent)
 
 	return job_id
 end
-
 -- Get allure path
 function M.get_allure_root()
 	local project_root = vim.fn.getcwd()
@@ -151,7 +197,7 @@ function M.run_go_test()
 	local word = left_part .. right_part
 
 	M.clean_allure_results_dir()
-	local command = string.format("go test ./$s -v -tags %s --allure-go.m %s", M.test_path, M.tag, word)
+	local command = string.format("go test ./%s -v -tags %s --allure-go.m %s", M.test_path, M.tag, word)
 
 	local test_job_id = run_command(command, vim.fn.getcwd(), notifyOnExitForTests)
 	table.insert(test_job_ids, test_job_id)
@@ -172,11 +218,21 @@ function M.stop_tests()
 	stop_jobs(test_job_ids)
 end
 
--- Change the build tag used for Go tests
+-- Change the build tag used for Go tests and save the new configuration.
 function M.change_tag()
 	local new_tag = vim.fn.input("Enter new tag: ")
 	if new_tag and #new_tag > 0 then
 		M.tag = new_tag
+		save_config() -- Save the updated tag
+	end
+end
+
+-- Change the test path and save the new configuration
+function M.set_test_path()
+	local new_test_path = vim.fn.input("Enter new test path: ")
+	if new_test_path and #new_test_path > 0 then
+		M.test_path = new_test_path
+		save_config() -- Save the updated tag
 	end
 end
 
